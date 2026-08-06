@@ -125,13 +125,13 @@ export default function GenerateFlyerPage() {
     ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
 
     // Draw main name (centered at top) - Using Cinzel
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = `bold 55px "Cinzel"`;
-    ctx.fillStyle = "#A18268";
-    const nameX = canvas.width / 2;
-    const nameY = canvas.height * 0.525;
-    ctx.fillText(name, nameX, nameY);
+    // ctx.textAlign = "center";
+    // ctx.textBaseline = "middle";
+    // ctx.font = `bold 55px "Cinzel"`;
+    // ctx.fillStyle = "#A18268";
+    // const nameX = canvas.width / 2;
+    // const nameY = canvas.height * 0.525;
+    // ctx.fillText(name, nameX, nameY);
 
     // Load QR code
     const qrImg = new window.Image();
