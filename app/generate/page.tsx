@@ -11,6 +11,7 @@ export default function GenerateFlyerPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const textCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const [loading, setLoading] = useState(true);
   const [qrCodeData, setQrCodeData] = useState("");
@@ -18,7 +19,34 @@ export default function GenerateFlyerPage() {
   const [frameImage, setFrameImage] = useState<HTMLImageElement | null>(null);
   const [qrImage, setQrImage] = useState<string>("");
   const [compositeImage, setCompositeImage] = useState<string>("");
-  const computedFont = getComputedStyle(document.body).fontFamily;
+  const [fontLoaded, setFontLoaded] = useState(false);
+
+  const loadFont = async () => {
+    try {
+      const fontWithSpace = new FontFace(
+        "Syamsiah Arabic",
+        "url(/fonts/Syamsiah-Arabic.woff2)",
+        { weight: "100 900", style: "normal" },
+      );
+      await fontWithSpace.load();
+      document.fonts.add(fontWithSpace);
+
+      const fontWithoutSpace = new FontFace(
+        "SyamsiahArabic",
+        "url(/fonts/Syamsiah-Arabic.woff2)",
+        { weight: "100 900", style: "normal" },
+      );
+      await fontWithoutSpace.load();
+      document.fonts.add(fontWithoutSpace);
+
+      // console.log("✅ Both fonts loaded successfully");
+      setFontLoaded(true);
+      return true;
+    } catch (error) {
+      console.error("❌ Font loading failed:", error);
+      return false;
+    }
+  };
 
   useEffect(() => {
     const init = async () => {
@@ -33,8 +61,9 @@ export default function GenerateFlyerPage() {
       setQrCodeData(code);
       setName(decodeURIComponent(personName));
 
-      // 🔥 Ensure Cinzel font is loaded before drawing
-      await document.fonts.load('bold 40px "Cinzel"');
+      await loadFont();
+      await document.fonts.ready;
+      await document.fonts.load('bold 50px "Cinzel"');
 
       await Promise.all([loadFrameImage(), generateQRCode(code)]);
       setLoading(false);
@@ -47,9 +76,13 @@ export default function GenerateFlyerPage() {
     return new Promise((resolve) => {
       const img = new window.Image();
       img.crossOrigin = "anonymous";
-      img.src = "/frame.jpeg"; // Make sure this matches your filename
+      img.src = "/frame1.jpeg";
       img.onload = () => {
         setFrameImage(img);
+        resolve();
+      };
+      img.onerror = () => {
+        console.error("Failed to load frame image");
         resolve();
       };
     });
@@ -71,66 +104,166 @@ export default function GenerateFlyerPage() {
     }
   };
 
-  // Create composite image when all assets are loaded
   useEffect(() => {
-    if (!loading && frameImage && qrImage && canvasRef.current) {
+    if (!loading && frameImage && qrImage && canvasRef.current && fontLoaded) {
       createCompositeImage();
     }
-  }, [loading, frameImage, qrImage]);
+  }, [loading, frameImage, qrImage, fontLoaded]);
 
-  const createCompositeImage = () => {
+  // Helper function to render text using HTML and capture to canvas
+  const renderTextToCanvas = (
+    text: string,
+    fontFamily: string,
+    fontSize: number,
+    color: string,
+  ): Promise<string> => {
+    return new Promise((resolve) => {
+      // Create a temporary div to render the text with HTML/CSS
+      const tempDiv = document.createElement("div");
+      tempDiv.style.cssText = `
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+        font-family: "${fontFamily}", "Cinzel", serif;
+        font-weight: 700;
+        font-size: ${fontSize}px;
+        color: ${color};
+        white-space: nowrap;
+        padding: 10px;
+        background: transparent;
+        letter-spacing: 0.5px;
+      `;
+      tempDiv.textContent = text.toUpperCase();
+      document.body.appendChild(tempDiv);
+
+      // Measure the text
+      const rect = tempDiv.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+
+      // Create a canvas to render the text
+      const textCanvas = document.createElement("canvas");
+      textCanvas.width = width + 20;
+      textCanvas.height = height + 20;
+      const textCtx = textCanvas.getContext("2d");
+
+      if (textCtx) {
+        // Draw the text using the same font
+        textCtx.font = `700 ${fontSize}px "${fontFamily}", "Cinzel", serif`;
+        textCtx.textAlign = "left";
+        textCtx.textBaseline = "top";
+        textCtx.fillStyle = color;
+        textCtx.fillText(text.toUpperCase(), 10, 10);
+      }
+
+      // Clean up
+      document.body.removeChild(tempDiv);
+
+      resolve(textCanvas.toDataURL("image/png"));
+    });
+  };
+
+  const createCompositeImage = async () => {
+    await document.fonts.ready;
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
     const canvas = canvasRef.current;
     if (!canvas || !frameImage || !qrImage) return;
 
-    // Set canvas dimensions to match frame
     canvas.width = frameImage.width;
     canvas.height = frameImage.height;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Draw frame first
+    // Draw frame
     ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
 
-    // Draw name
-    ctx.font = `bold 50px ${computedFont}`;
-    ctx.fillStyle = "#504943";
+    // Draw main name (centered at top) - Using Cinzel
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
+    ctx.font = `bold 55px "Cinzel"`;
+    ctx.fillStyle = "#A18268";
+    const nameX = canvas.width / 2;
+    const nameY = canvas.height * 0.525;
+    ctx.fillText(name, nameX, nameY); // 🔴 Removed toUpperCase()
 
-    // Position name - adjust these coordinates based on your frame
-    const nameX = canvas.width / 2; // Center horizontally
-    const nameY = canvas.height * 0.54; // 47% from top (adjust as needed)
-
-    ctx.fillText(name.toUpperCase(), nameX, nameY);
-
-    // Load and draw QR code
+    // Load QR code
     const qrImg = new window.Image();
     qrImg.crossOrigin = "anonymous";
-    qrImg.onload = () => {
-      // Position QR - adjust these coordinates based on your frame
-      const qrSize = 285; // Size of QR code
-      const qrX = (canvas.width - qrSize) / 2; // Center horizontally
-      const qrY = canvas.height * 0.59; // 60% from top (adjust as needed)
 
-      // Draw white background for QR
-      ctx.fillStyle = "#FFFFFF";
-      ctx.fillRect(qrX - 5, qrY - 5, qrSize + 10, qrSize + 10);
+    await new Promise((resolve) => {
+      qrImg.onload = resolve;
+      qrImg.onerror = resolve;
+      qrImg.src = qrImage;
+    });
 
-      // Draw QR code
-      ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+    const qrSize = 500;
+    const qrX = (canvas.width - qrSize) / 2 - 611;
+    const qrY = canvas.height * 0.707;
 
-      // Convert canvas to data URL
-      setCompositeImage(canvas.toDataURL("image/png"));
-    };
-    qrImg.src = qrImage;
+    const padding = 15;
+    ctx.fillStyle = "#FFFFFF";
+    ctx.shadowColor = "rgba(0,0,0,0.1)";
+    ctx.shadowBlur = 10;
+    ctx.fillRect(
+      qrX - padding,
+      qrY - padding,
+      qrSize + padding * 2,
+      qrSize + padding * 2,
+    );
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+
+    ctx.save();
+    const radius = 16;
+    const x = qrX - padding;
+    const y = qrY - padding;
+    const w = qrSize + padding * 2;
+    const h = qrSize + padding * 2;
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + w - radius, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+    ctx.lineTo(x + w, y + h - radius);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+    ctx.lineTo(x + radius, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+    ctx.restore();
+
+    // ===== DRAW NAME ON RIGHT SIDE OF QR =====
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+
+    ctx.font = `bold 120px "Syamsiah Arabic", "Cinzel", serif`;
+    ctx.fillStyle = "#66442F";
+    const labelX = qrX + qrSize + 40;
+    const labelY = qrY + qrSize / 2;
+
+    ctx.shadowColor = "rgba(255,255,255,0.8)";
+    ctx.shadowBlur = 10;
+    ctx.fillText(name, labelX, labelY);
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    // console.log("✅ Text drawn with font:", ctx.font);
+
+    const dataUrl = canvas.toDataURL("image/png");
+    setCompositeImage(dataUrl);
   };
 
   const handleDownload = () => {
     if (!compositeImage) return;
 
     const link = document.createElement("a");
-    link.download = `wedding-${name.replace(/\s+/g, "_")}-${qrCodeData}.png`;
+    link.download = `mehfil-tash-${name.replace(/\s+/g, "_")}-${qrCodeData}.png`;
     link.href = compositeImage;
     link.click();
   };
@@ -143,7 +276,7 @@ export default function GenerateFlyerPage() {
       printWindow.document.write(`
         <html>
           <head>
-            <title>Wedding Flyer - ${name}</title>
+            <title>Meḥfil-e-Yash - ${name}</title>
             <style>
               body {
                 margin: 0;
@@ -186,6 +319,9 @@ export default function GenerateFlyerPage() {
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-amber-600 mx-auto mb-4" />
           <p className="text-gray-600 font-cinzel">Creating your flyer...</p>
+          <p className="text-xs text-gray-400 mt-2">
+            {fontLoaded ? "✅ Font Loaded" : "⏳ Loading Font..."}
+          </p>
         </div>
       </div>
     );
@@ -194,10 +330,8 @@ export default function GenerateFlyerPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 p-4">
       <div className="max-w-4xl mx-auto py-8">
-        {/* Hidden canvas for image processing */}
         <canvas ref={canvasRef} style={{ display: "none" }} />
 
-        {/* Navigation */}
         <div className="flex justify-between items-center mb-6">
           <Button variant="ghost" onClick={() => router.push("/")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -210,29 +344,28 @@ export default function GenerateFlyerPage() {
           </Button>
         </div>
 
-        {/* Main Content */}
         <Card className="p-6 md:p-8 bg-white/95 backdrop-blur shadow-2xl">
           <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#504943] mb-2 font-cinzel">
-              Your Wedding Invitation
+            <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-[#504943] mb-2 font-arabic">
+              Meḥfil-e-Yash
             </h2>
-            <p className="text-gray-500 font-cinzel text-lg">{name}</p>
+            <p className="text-gray-500 font-arabic text-2xl md:text-3xl lg:text-4xl">
+              {name}
+            </p>
           </div>
 
-          {/* Composite Image Preview */}
           {compositeImage && (
             <div className="mb-8 flex justify-center">
               <div className="relative rounded-xl shadow-2xl overflow-hidden max-w-2xl">
                 <img
                   src={compositeImage}
-                  alt={`Wedding flyer for ${name}`}
+                  alt={`Meḥfil-e-Yash invitation for ${name}`}
                   className="w-full h-auto"
                 />
               </div>
             </div>
           )}
 
-          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
             <Button
               onClick={handleDownload}
@@ -251,7 +384,6 @@ export default function GenerateFlyerPage() {
             </Button>
           </div>
 
-          {/* QR Code Info */}
           <div className="text-center space-y-2">
             <p className="text-sm text-gray-500 bg-amber-50 inline-block px-4 py-2 rounded-full">
               <span className="font-semibold">QR Code contains:</span>{" "}

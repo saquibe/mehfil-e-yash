@@ -84,7 +84,7 @@ export default function HomePage() {
       <div className="max-w-4xl mx-auto pt-16">
         {/* Header with Add Button */}
         <div className="text-center mb-10">
-          <h1 className="text-5xl font-bold text-[#504943] mb-4 font-cinzel">
+          <h1 className="text-5xl font-bold text-[#504943] mb-4 font-arabic">
             <div className="flex justify-end mb-4">
               <Button
                 onClick={handleAddNewInvitation}
@@ -94,9 +94,11 @@ export default function HomePage() {
                 Add New Invitation
               </Button>
             </div>
-            Wedding Invitation
+            <span className="font-arabic text-6xl">Meḥfil-e-Yash</span>
+            <br />
+            {/* <span className="text-2xl font-cinzel">Wedding Invitation</span> */}
           </h1>
-          <p className="text-xl text-gray-600 font-cinzel">
+          <p className="text-4xl text-gray-600 font-arabic">
             Generate your personalized flyer
           </p>
         </div>
@@ -104,12 +106,12 @@ export default function HomePage() {
         {/* Search Card */}
         <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur">
           <CardHeader>
-            <CardTitle className="text-2xl text-center text-[#504943] font-cinzel">
+            <CardTitle className="text-2xl text-center text-[#504943] font-cinzel font-semibold">
               Search by Name or Mobile Number
             </CardTitle>
-            <CardDescription className="text-center text-gray-600">
+            {/* <CardDescription className="text-center text-gray-600">
               Enter your full name or 10-digit mobile number
-            </CardDescription>
+            </CardDescription> */}
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSearch} className="space-y-6">
@@ -150,7 +152,6 @@ export default function HomePage() {
             {/* Search Results */}
             {searched && searchResults.length > 0 && (
               <div className="mt-8">
-                {/* If mobile search with multiple results, show "Generate All" button */}
                 {isMobileSearch && searchResults.length > 1 ? (
                   <>
                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
@@ -175,7 +176,6 @@ export default function HomePage() {
                       </div>
                     </div>
 
-                    {/* Show individual members */}
                     <h4 className="text-md font-semibold text-gray-700 mb-3">
                       Individual Members:
                     </h4>
@@ -216,7 +216,6 @@ export default function HomePage() {
                     </div>
                   </>
                 ) : (
-                  // Single result (either name search or mobile with one result)
                   <div className="space-y-3">
                     {searchResults.map((result, index) => (
                       <Card
@@ -225,7 +224,7 @@ export default function HomePage() {
                       >
                         <div className="flex justify-between items-center">
                           <div>
-                            <h4 className="font-semibold text-[#504943] font-cinzel text-xl">
+                            <h4 className="font-semibold text-[#504943] font-arabic text-3xl">
                               {result.name}
                             </h4>
                             <p className="text-sm text-gray-500">
@@ -273,7 +272,7 @@ export default function HomePage() {
 
         {/* Decorative Footer */}
         <div className="text-center mt-8 text-gray-500 font-cinzel text-sm">
-          Wedding Invitation Flyer Generator © 2026
+          Meḥfil-e-Yash Invitation Generator © 2026
         </div>
       </div>
     </div>

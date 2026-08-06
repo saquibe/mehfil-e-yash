@@ -17,7 +17,7 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        cinzel: ["var(--font-cinzel)", "serif"],
+        arabic: ['"Syamsiah Arabic"', '"Cinzel"', "serif"],
       },
       colors: {
         border: "hsl(var(--border))",

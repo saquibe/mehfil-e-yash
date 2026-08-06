@@ -30,18 +30,16 @@ export default function GenerateMultiplePage() {
     mobiles: string[];
   } | null>(null);
 
-  // Load frame image
   useEffect(() => {
     const img = new window.Image();
     img.crossOrigin = "anonymous";
-    img.src = "/frame.jpeg";
+    img.src = "/frame1.jpeg";
     img.onload = () => {
       setFrameImage(img);
       setFrameLoaded(true);
     };
   }, []);
 
-  // Get URL params
   useEffect(() => {
     const codes = searchParams.get("codes");
     const names = searchParams.get("names");
@@ -70,7 +68,6 @@ export default function GenerateMultiplePage() {
     name: string,
     qrDataURL: string,
   ): Promise<string> => {
-    // 🔥 Ensure Cinzel font is fully loaded
     await document.fonts.load("700 50px Cinzel");
 
     const canvas = document.createElement("canvas");
@@ -82,14 +79,13 @@ export default function GenerateMultiplePage() {
 
     ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
 
-    // ✅ Premium Cinzel usage
     ctx.font = "700 50px Cinzel";
     ctx.fillStyle = "#504943";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
     const nameX = canvas.width / 2;
-    const nameY = canvas.height * 0.53;
+    const nameY = canvas.height * 0.525;
 
     ctx.fillText(name.toUpperCase(), nameX, nameY);
 
@@ -102,9 +98,9 @@ export default function GenerateMultiplePage() {
       qrImg.onerror = rej;
     });
 
-    const qrSize = 285;
+    const qrSize = 280;
     const qrX = (canvas.width - qrSize) / 2;
-    const qrY = canvas.height * 0.59;
+    const qrY = canvas.height * 0.58;
 
     ctx.fillStyle = "#FFFFFF";
     ctx.fillRect(qrX - 5, qrY - 5, qrSize + 10, qrSize + 10);
@@ -149,7 +145,7 @@ export default function GenerateMultiplePage() {
     code: string,
   ) => {
     const link = document.createElement("a");
-    link.download = `wedding-${name.replace(/\s+/g, "_")}-${code}.png`;
+    link.download = `mehfil-tash-${name.replace(/\s+/g, "_")}-${code}.png`;
     link.href = compositeImage;
     link.click();
   };
@@ -162,7 +158,7 @@ export default function GenerateMultiplePage() {
     for (const flyer of flyers) {
       const base64Data = flyer.compositeImage.split(",")[1];
       zip.file(
-        `wedding-${flyer.name.replace(/\s+/g, "_")}-${flyer.code}.png`,
+        `mehfil-tash-${flyer.name.replace(/\s+/g, "_")}-${flyer.code}.png`,
         base64Data,
         { base64: true },
       );
@@ -172,7 +168,7 @@ export default function GenerateMultiplePage() {
 
     const link = document.createElement("a");
     link.href = URL.createObjectURL(content);
-    link.download = "all-wedding-flyers.zip";
+    link.download = "mehfil-tash-all-flyers.zip";
     link.click();
 
     setDownloading(false);
@@ -208,8 +204,8 @@ export default function GenerateMultiplePage() {
         </div>
 
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-[#504943] font-cinzel">
-            Family Wedding Flyers
+          <h2 className="text-3xl font-bold text-[#504943] font-arabic">
+            Meḥfil-ṫ-Ṭash Family Flyers
           </h2>
         </div>
 
