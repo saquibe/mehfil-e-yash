@@ -105,9 +105,15 @@
     font-family: "Cinzel", serif;
   }
 
+  /* 🔴 SET ROOT FONT TO SYAMSIAH ARABIC */
+  html {
+    font-family: "Syamsiah Arabic", "Cinzel", serif;
+  }
+
   /* Base body font */
   body {
-    @apply bg-background text-foreground font-cinzel;
+    @apply bg-background text-foreground;
+    font-family: "Syamsiah Arabic", "Cinzel", serif;
   }
 }
 

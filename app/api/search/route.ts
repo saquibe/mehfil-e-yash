@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     }
 
     const db = await getDatabase();
-    const collection = db.collection("marriage_invitation");
+    const collection = db.collection("meḥfil-e-yash-invitations");
 
     let query = {};
     const isMobile = /^\d{10}$/.test(searchTerm);

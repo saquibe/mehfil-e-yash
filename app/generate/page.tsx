@@ -11,7 +11,6 @@ export default function GenerateFlyerPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const textCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const [loading, setLoading] = useState(true);
   const [qrCodeData, setQrCodeData] = useState("");
@@ -39,7 +38,6 @@ export default function GenerateFlyerPage() {
       await fontWithoutSpace.load();
       document.fonts.add(fontWithoutSpace);
 
-      // console.log("✅ Both fonts loaded successfully");
       setFontLoaded(true);
       return true;
     } catch (error) {
@@ -110,59 +108,6 @@ export default function GenerateFlyerPage() {
     }
   }, [loading, frameImage, qrImage, fontLoaded]);
 
-  // Helper function to render text using HTML and capture to canvas
-  const renderTextToCanvas = (
-    text: string,
-    fontFamily: string,
-    fontSize: number,
-    color: string,
-  ): Promise<string> => {
-    return new Promise((resolve) => {
-      // Create a temporary div to render the text with HTML/CSS
-      const tempDiv = document.createElement("div");
-      tempDiv.style.cssText = `
-        position: absolute;
-        left: -9999px;
-        top: -9999px;
-        font-family: "${fontFamily}", "Cinzel", serif;
-        font-weight: 700;
-        font-size: ${fontSize}px;
-        color: ${color};
-        white-space: nowrap;
-        padding: 10px;
-        background: transparent;
-        letter-spacing: 0.5px;
-      `;
-      tempDiv.textContent = text.toUpperCase();
-      document.body.appendChild(tempDiv);
-
-      // Measure the text
-      const rect = tempDiv.getBoundingClientRect();
-      const width = rect.width;
-      const height = rect.height;
-
-      // Create a canvas to render the text
-      const textCanvas = document.createElement("canvas");
-      textCanvas.width = width + 20;
-      textCanvas.height = height + 20;
-      const textCtx = textCanvas.getContext("2d");
-
-      if (textCtx) {
-        // Draw the text using the same font
-        textCtx.font = `700 ${fontSize}px "${fontFamily}", "Cinzel", serif`;
-        textCtx.textAlign = "left";
-        textCtx.textBaseline = "top";
-        textCtx.fillStyle = color;
-        textCtx.fillText(text.toUpperCase(), 10, 10);
-      }
-
-      // Clean up
-      document.body.removeChild(tempDiv);
-
-      resolve(textCanvas.toDataURL("image/png"));
-    });
-  };
-
   const createCompositeImage = async () => {
     await document.fonts.ready;
     await new Promise((resolve) => setTimeout(resolve, 300));
@@ -186,7 +131,7 @@ export default function GenerateFlyerPage() {
     ctx.fillStyle = "#A18268";
     const nameX = canvas.width / 2;
     const nameY = canvas.height * 0.525;
-    ctx.fillText(name, nameX, nameY); // 🔴 Removed toUpperCase()
+    ctx.fillText(name, nameX, nameY);
 
     // Load QR code
     const qrImg = new window.Image();
@@ -253,8 +198,6 @@ export default function GenerateFlyerPage() {
 
     await new Promise((resolve) => setTimeout(resolve, 200));
 
-    // console.log("✅ Text drawn with font:", ctx.font);
-
     const dataUrl = canvas.toDataURL("image/png");
     setCompositeImage(dataUrl);
   };
@@ -315,10 +258,12 @@ export default function GenerateFlyerPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 p-4">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-amber-600 mx-auto mb-4" />
-          <p className="text-gray-600 font-cinzel">Creating your flyer...</p>
+          <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-amber-600 mx-auto mb-3 sm:mb-4" />
+          <p className="text-gray-600 font-cinzel text-sm sm:text-base">
+            Creating your flyer...
+          </p>
           <p className="text-xs text-gray-400 mt-2">
             {fontLoaded ? "✅ Font Loaded" : "⏳ Loading Font..."}
           </p>
@@ -328,35 +273,45 @@ export default function GenerateFlyerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 p-4">
-      <div className="max-w-4xl mx-auto py-8">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 p-3 sm:p-4 md:p-6 lg:p-8">
+      <div className="w-full max-w-4xl mx-auto py-4 sm:py-6 md:py-8">
         <canvas ref={canvasRef} style={{ display: "none" }} />
 
-        <div className="flex justify-between items-center mb-6">
-          <Button variant="ghost" onClick={() => router.push("/")}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Search
+        <div className="flex flex-wrap justify-between items-center gap-2 mb-4 sm:mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => router.push("/")}
+            size="sm"
+            className="text-sm sm:text-base"
+          >
+            <ArrowLeft className="mr-1 sm:mr-2 h-4 w-4" />
+            Back
           </Button>
 
-          <Button variant="ghost" onClick={() => router.push("/")}>
-            <Home className="mr-2 h-4 w-4" />
+          <Button
+            variant="ghost"
+            onClick={() => router.push("/")}
+            size="sm"
+            className="text-sm sm:text-base"
+          >
+            <Home className="mr-1 sm:mr-2 h-4 w-4" />
             Home
           </Button>
         </div>
 
-        <Card className="p-6 md:p-8 bg-white/95 backdrop-blur shadow-2xl">
-          <div className="text-center mb-8">
-            <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-[#504943] mb-2 font-arabic">
+        <Card className="p-4 sm:p-6 md:p-8 bg-white/95 backdrop-blur shadow-2xl">
+          <div className="text-center mb-4 sm:mb-6 md:mb-8">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#504943] mb-1 sm:mb-2 font-arabic">
               Meḥfil-e-Yash
             </h2>
-            <p className="text-gray-500 font-arabic text-2xl md:text-3xl lg:text-4xl">
+            <p className="text-gray-500 font-arabic text-xl sm:text-2xl md:text-3xl lg:text-4xl">
               {name}
             </p>
           </div>
 
           {compositeImage && (
-            <div className="mb-8 flex justify-center">
-              <div className="relative rounded-xl shadow-2xl overflow-hidden max-w-2xl">
+            <div className="mb-4 sm:mb-6 md:mb-8 flex justify-center">
+              <div className="relative rounded-xl shadow-2xl overflow-hidden w-full max-w-2xl">
                 <img
                   src={compositeImage}
                   alt={`Meḥfil-e-Yash invitation for ${name}`}
@@ -366,26 +321,26 @@ export default function GenerateFlyerPage() {
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-4 sm:mb-6">
             <Button
               onClick={handleDownload}
-              className="bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-700 hover:to-red-700 h-12 px-8 text-lg font-cinzel"
+              className="bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-700 hover:to-red-700 h-10 sm:h-12 px-4 sm:px-6 md:px-8 text-sm sm:text-base md:text-lg font-cinzel w-full sm:w-auto"
             >
-              <Download className="mr-2 h-5 w-5" />
+              <Download className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
               Download Flyer
             </Button>
 
             <Button
               onClick={handlePrint}
               variant="outline"
-              className="h-12 px-8 text-lg border-2 border-amber-600 text-amber-700 hover:bg-amber-50 font-cinzel"
+              className="h-10 sm:h-12 px-4 sm:px-6 md:px-8 text-sm sm:text-base md:text-lg border-2 border-amber-600 text-amber-700 hover:bg-amber-50 font-cinzel w-full sm:w-auto"
             >
               🖨️ Print Flyer
             </Button>
           </div>
 
-          <div className="text-center space-y-2">
-            <p className="text-sm text-gray-500 bg-amber-50 inline-block px-4 py-2 rounded-full">
+          <div className="text-center">
+            <p className="text-xs sm:text-sm text-gray-500 bg-amber-50 inline-block px-3 sm:px-4 py-1 sm:py-2 rounded-full">
               <span className="font-semibold">QR Code contains:</span>{" "}
               {qrCodeData}
             </p>
