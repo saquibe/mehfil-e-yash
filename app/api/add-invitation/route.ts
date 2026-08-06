@@ -3,12 +3,12 @@ import { getDatabase } from "@/lib/mongodb";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, mobile_number, qr_code } = await req.json();
+    const { name, mobile_number, regNum } = await req.json();
 
     // Validate required fields
-    if (!name || !mobile_number || !qr_code) {
+    if (!name || !mobile_number || !regNum) {
       return NextResponse.json(
-        { error: "Name, mobile number, and QR code are required" },
+        { error: "Name, mobile number, and registration number are required" },
         { status: 400 },
       );
     }
@@ -24,11 +24,14 @@ export async function POST(req: NextRequest) {
     const db = await getDatabase();
     const collection = db.collection("meḥfil-e-yash-invitations");
 
-    // Check if QR code already exists
-    const existingQR = await collection.findOne({ qr_code });
-    if (existingQR) {
+    // Check if registration number already exists
+    const existingRegNum = await collection.findOne({ regNum });
+    if (existingRegNum) {
       return NextResponse.json(
-        { error: "QR code already exists. Please use a unique code." },
+        {
+          error:
+            "Registration number already exists. Please use a unique number.",
+        },
         { status: 400 },
       );
     }
@@ -37,7 +40,7 @@ export async function POST(req: NextRequest) {
     const newInvitation = {
       name: name.trim(),
       mobile_number: mobile_number.trim(),
-      qr_code: qr_code.trim().toUpperCase(),
+      regNum: regNum.trim().toUpperCase(),
       created_at: new Date(),
     };
 

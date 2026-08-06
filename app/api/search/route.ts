@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       results: results.map((result) => ({
         name: result.name,
         mobile_number: result.mobile_number,
-        qr_code: result.qr_code,
+        regNum: result.regNum,
       })),
     });
   } catch (error: any) {

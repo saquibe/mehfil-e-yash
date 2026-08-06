@@ -63,7 +63,7 @@ export default function HomePage() {
 
   const handleGenerateMultiple = () => {
     if (searchResults.length > 0) {
-      const codes = searchResults.map((r) => r.qr_code).join(",");
+      const codes = searchResults.map((r) => r.regNum).join(",");
       const names = searchResults.map((r) => r.name).join("|");
       const mobiles = searchResults.map((r) => r.mobile_number).join(",");
 
@@ -195,15 +195,12 @@ export default function HomePage() {
                                 Mobile: {result.mobile_number}
                               </p>
                               <p className="text-xs text-gray-400">
-                                Code: {result.qr_code}
+                                Code: {result.regNum}
                               </p>
                             </div>
                             <Button
                               onClick={() =>
-                                handleGenerateSingle(
-                                  result.qr_code,
-                                  result.name,
-                                )
+                                handleGenerateSingle(result.regNum, result.name)
                               }
                               variant="outline"
                               className="border-amber-500 text-amber-700 hover:bg-amber-50 w-full sm:w-auto"
@@ -232,12 +229,12 @@ export default function HomePage() {
                               Mobile: {result.mobile_number}
                             </p>
                             <p className="text-xs text-gray-400">
-                              Code: {result.qr_code}
+                              Code: {result.regNum}
                             </p>
                           </div>
                           <Button
                             onClick={() =>
-                              handleGenerateSingle(result.qr_code, result.name)
+                              handleGenerateSingle(result.regNum, result.name)
                             }
                             className="bg-gradient-to-r from-amber-600 to-red-600 h-10 sm:h-12 px-4 sm:px-6 w-full sm:w-auto text-sm sm:text-base"
                           >

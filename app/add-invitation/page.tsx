@@ -23,7 +23,7 @@ export default function AddInvitationPage() {
   const [formData, setFormData] = useState({
     name: "",
     mobile_number: "",
-    qr_code: "",
+    regNum: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,7 +47,7 @@ export default function AddInvitationPage() {
         Math.floor(Math.random() * characters.length),
       );
     }
-    setFormData((prev) => ({ ...prev, qr_code: result }));
+    setFormData((prev) => ({ ...prev, regNum: result }));
   };
 
   const validateForm = () => {
@@ -66,8 +66,8 @@ export default function AddInvitationPage() {
       return false;
     }
 
-    if (!formData.qr_code.trim()) {
-      setError("QR code is required");
+    if (!formData.regNum.trim()) {
+      setError("Registration number is required");
       return false;
     }
 
@@ -96,7 +96,7 @@ export default function AddInvitationPage() {
 
       if (response.ok) {
         setSuccess(true);
-        setFormData({ name: "", mobile_number: "", qr_code: "" });
+        setFormData({ name: "", mobile_number: "", regNum: "" });
 
         // Redirect back to home after 2 seconds
         setTimeout(() => {
@@ -197,8 +197,8 @@ export default function AddInvitationPage() {
                 </label>
                 <div className="flex gap-2">
                   <Input
-                    name="qr_code"
-                    value={formData.qr_code}
+                    name="regNum"
+                    value={formData.regNum}
                     onChange={handleChange}
                     placeholder="e.g., 15TYNT"
                     className="h-12 text-lg border-2 border-amber-200 focus:border-amber-400 flex-1"
@@ -219,9 +219,7 @@ export default function AddInvitationPage() {
               </div>
 
               {/* Preview Section */}
-              {(formData.name ||
-                formData.mobile_number ||
-                formData.qr_code) && (
+              {(formData.name || formData.mobile_number || formData.regNum) && (
                 <div className="mt-6 p-4 bg-amber-50 rounded-lg border border-amber-200">
                   <h3 className="font-semibold text-[#504943] mb-3 font-cinzel">
                     Preview:
@@ -241,12 +239,12 @@ export default function AddInvitationPage() {
                         {formData.mobile_number}
                       </p>
                     )}
-                    {formData.qr_code && (
+                    {formData.regNum && (
                       <p>
                         <span className="font-medium text-gray-600">
-                          QR Code:
+                          Registration Number:
                         </span>{" "}
-                        {formData.qr_code}
+                        {formData.regNum}
                       </p>
                     )}
                   </div>
