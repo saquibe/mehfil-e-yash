@@ -240,9 +240,9 @@ export default function GenerateFlyerPage() {
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
 
-    ctx.font = `bold 120px "Syamsiah Arabic", "Cinzel", serif`;
+    ctx.font = `bold 140px "Syamsiah Arabic", "Cinzel", serif`;
     ctx.fillStyle = "#66442F";
-    const labelX = qrX + qrSize + 40;
+    const labelX = qrX + qrSize + 120;
     const labelY = qrY + qrSize / 2;
 
     ctx.shadowColor = "rgba(255,255,255,0.8)";
