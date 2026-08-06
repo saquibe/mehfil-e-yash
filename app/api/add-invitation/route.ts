@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     }
 
     const db = await getDatabase();
-    const collection = db.collection("marriage_invitation");
+    const collection = db.collection("meḥfil-e-yash-invitations");
 
     // Check if QR code already exists
     const existingQR = await collection.findOne({ qr_code });
